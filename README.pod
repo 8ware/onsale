@@ -1,0 +1,8 @@
+=pod
+
+=head1 NAME
+
+onsale -- simple app to spotlight on sale actions
+
+=cut
+
