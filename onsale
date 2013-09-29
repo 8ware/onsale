@@ -1,0 +1,44 @@
+#! /usr/bin/env perl
+
+use strict;
+use warnings;
+
+use feature 'say';
+
+
+use HTML::FormatText::WithLinks;
+use Mail::Trash::Inbox;
+
+my $INBOX = Mail::Trash::Inbox->new('kaufland-news');
+my $FORMATTER = HTML::FormatText::WithLinks->new(
+	before_link => '',
+	after_link => ' [%n]',
+	footnote => '[%n] %l',
+	unique_links => 1,
+	skip_linked_urls => 1
+);
+
+my $INTERESTS = qr/
+	jacobs
+/ix;
+
+
+my @mails = $INBOX->fetch_mails();
+my @newsletters = grep {
+	$_->subject() =~ /Kaufland/i
+} @mails;
+
+unless (@newsletters) {
+	say "no newsletters available";
+	exit;
+}
+
+for my $newsletter (@newsletters) {
+	my $content = $newsletter->content();
+	if ($content =~ /$INTERESTS/) {
+		printf "Newsletter vom %s (%s):\n\n",
+			$newsletter->date(), $newsletter->time();
+		print $FORMATTER->parse($content);
+	}
+}
+
